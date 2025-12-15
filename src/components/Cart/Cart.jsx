@@ -1,0 +1,45 @@
+import { useCart } from "../../context/CartContext";
+import "./Cart.css";
+
+
+const Cart = () => {
+const { cart, removeItem, clearCart, totalPrice } = useCart();
+
+
+if (cart.length === 0) {
+return (
+<div className="cart-empty">
+<h2>🛒 El carrito está vacío</h2>
+</div>
+);
+}
+
+
+return (
+<div className="cart-container">
+<h2>Tu carrito</h2>
+
+
+{cart.map(prod => (
+<div className="cart-item" key={prod.id}>
+<div>
+<h3>{prod.title}</h3>
+<p>${prod.price} x {prod.quantity}</p>
+<strong>Subtotal: ${prod.price * prod.quantity}</strong>
+</div>
+<button onClick={() => removeItem(prod.id)}>❌</button>
+</div>
+))}
+
+
+<div className="cart-footer">
+<h3>Total: ${totalPrice}</h3>
+<button className="btn-clear" onClick={clearCart}>Vaciar carrito</button>
+<button className="btn-buy">Finalizar compra</button>
+</div>
+</div>
+);
+};
+
+
+export default Cart;

@@ -1,28 +1,35 @@
-import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "../services/firebase";
 import ItemList from "../components/ItemList/ItemList";
-import { products } from "../data/products";
 
 const ItemListContainer = () => {
-  const [items, setItems] = useState([]);
-  const { categoryId } = useParams();
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchProducts = new Promise((resolve) => {
-      setTimeout(() => {
-        resolve(categoryId ? products.filter(p => p.category === categoryId) : products);
-      }, 1000);
-    });
+    const productsRef = collection(db, "products");
 
-    fetchProducts.then((res) => setItems(res));
-  }, [categoryId]);
+    getDocs(productsRef)
+      .then((resp) => {
+        const items = resp.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        setProducts(items);
+      })
+      .catch((error) => {
+        console.error("Error Firestore:", error);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, []);
 
-  return (
-    <div>
-      <h2>{categoryId ? `Categoría: ${categoryId}` : "Catálogo completo"}</h2>
-      <ItemList items={items} />
-    </div>
-  );
+  if (loading) return <p>Cargando...</p>;
+
+  return <ItemList products={products} />;
 };
 
 export default ItemListContainer;
+
