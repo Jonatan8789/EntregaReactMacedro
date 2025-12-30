@@ -1,35 +1,38 @@
 import { useEffect, useState } from "react";
-import { collection, getDocs } from "firebase/firestore";
+import { useParams } from "react-router-dom";
+import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "../services/firebase";
 import ItemList from "../components/ItemList/ItemList";
 
 const ItemListContainer = () => {
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { categoryId } = useParams(); // 👈 ACÁ ESTÁ LA CLAVE
+  const [items, setItems] = useState([]);
 
   useEffect(() => {
     const productsRef = collection(db, "products");
 
-    getDocs(productsRef)
-      .then((resp) => {
-        const items = resp.docs.map(doc => ({
+    const q = categoryId
+      ? query(productsRef, where("category", "==", categoryId))
+      : productsRef;
+
+    getDocs(q)
+      .then(resp => {
+        const products = resp.docs.map(doc => ({
           id: doc.id,
           ...doc.data()
         }));
-        setProducts(items);
+        setItems(products);
       })
-      .catch((error) => {
-        console.error("Error Firestore:", error);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  }, []);
+      .catch(err => console.error(err));
+  }, [categoryId]);
 
-  if (loading) return <p>Cargando...</p>;
-
-  return <ItemList products={products} />;
+  return (
+    <div>
+      <ItemList items={items} />
+    </div>
+  );
 };
 
 export default ItemListContainer;
+
 

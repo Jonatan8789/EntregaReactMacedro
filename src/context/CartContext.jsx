@@ -29,6 +29,7 @@ export const CartProvider = ({ children }) => {
     setCart([]);
   };
 
+  // 👇 AHORA SON VALORES
   const totalItems = cart.reduce(
     (acc, item) => acc + item.quantity,
     0
@@ -55,7 +56,5 @@ export const CartProvider = ({ children }) => {
   );
 };
 
-// 👇 ESTA ES LA CLAVE QUE FALTABA
-export const useCart = () => {
-  return useContext(CartContext);
-};
+export const useCart = () => useContext(CartContext);
+
